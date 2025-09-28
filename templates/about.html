@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - TextSummarizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2d5bff;
+            --primary-dark: #2548d4;
+            --secondary: #4c1d95;
+            --accent: #f72585;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light-bg: #f8f9fc;
+            --dark-text: #2b2d42;
+            --light-text: #6c757d;
+            --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            --gradient-bg: linear-gradient(135deg, #2d5bff 0%, #4c1d95 100%);
+            --gradient-card: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(45, 91, 255, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(76, 29, 149, 0.1) 0%, transparent 25%);
+            background-attachment: fixed;
+        }
+        
+        .navbar {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%) !important;
+            padding: 0.8rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            margin: 0 0.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, rgba(45, 91, 255, 0.9) 0%, rgba(76, 29, 149, 0.9) 100%);
+            color: white;
+            padding: 4rem 0 3rem;
+            margin-bottom: 3rem;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .display-4 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .lead {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+        
+        .section-title {
+            position: relative;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            text-align: center;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -15px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+        
+        .feature-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            height: 100%;
+            background: var(--gradient-card);
+            position: relative;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-icon {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .stats-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .developer-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .developer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .developer-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            border: 5px solid #f0f0f0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .social-links {
+            margin-top: 1.5rem;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            line-height: 40px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+        
+        .tech-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, #2b2d42 0%, #1a1c2d 100%);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 5rem;
+        }
+        
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+            margin: 0 0.5rem;
+        }
+        
+        .social-icon:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -150px;
+            right: -150px;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--secondary);
+            bottom: -100px;
+            left: -100px;
+        }
+        
+        .animated-border {
+            position: relative;
+        }
+        
+        .animated-border::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+        }
+        
+        .animated-border:hover::after {
+            width: 100%;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 3rem 0 2rem;
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .display-4 {
+                font-size: 2.2rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-file-alt me-2"></i>TextSummarizer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('predict') }}">Summarize</a>
+                    </li>
+                    <li class="nav-item">
+                          <a class="nav-link active" href="{{ url_for('about') }}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About Page Content -->
+    <div id="about-page">
+        <!-- Hero Section -->
+        <section class="hero-section text-center">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+            </div>
+            <div class="container hero-content">
+                <h1 class="display-4 fw-bold mb-4">About TextSummarizer</h1>
+                <p class="lead mb-4">Learn about our mission, how our text summarization system works, and the developer behind this project</p>
+            </div>
+        </section>
+
+        <!-- Project Overview Section -->
+        <section class="container mb-5">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="section-title">Project Overview</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h4>Our Mission</h4>
+                        <p class="text-muted">TextSummarizer aims to revolutionize how people consume information by using advanced AI to create concise, accurate summaries of lengthy text. Our goal is to help students, researchers, and professionals save time while maintaining comprehension of important content.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h4>How It Works</h4>
+                        <p class="text-muted">Our system uses state-of-the-art natural language processing and transformer models to analyze text, identify key concepts, and generate coherent summaries. The algorithm preserves the original meaning while significantly reducing text length, making information consumption more efficient.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Developer Section -->
+        <section class="container mb-5">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="section-title">About The Developer</h2>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="developer-card">
+                        <img src="{{ url_for('static', filename='images/img.png') }}" alt="Developer" class="developer-img">
+                        <h3>Jinit Yadav</h3>
+                        <p class="text-muted">Data Science Student & Developer</p>
+                        <p>I'm a passionate data science student with a strong interest in natural language processing and AI applications. This project combines my technical skills with my desire to create solutions that can make information more accessible and digestible for everyone.</p>
+                        
+                        <div class="tech-stack">
+                            <span class="tech-item">Python</span>
+                            <span class="tech-item">NLP</span>
+                            <span class="tech-item">Flask</span>
+                            <span class="tech-item">Transformers</span>
+                            <span class="tech-item">HTML/CSS</span>
+                            <span class="tech-item">Bootstrap</span>
+                        </div>
+                        
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Details Section -->
+        <section class="container mb-5">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="section-title">Project Details</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <h4 class="mb-3">Technical Implementation</h4>
+                        <p class="text-muted">This project was built using a Flask backend with transformer models for text summarization. The frontend utilizes Bootstrap for responsive design and custom CSS for the unique visual style.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> NLP: Transformers, Hugging Face, NLTK</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Backend: Python, Flask</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Frontend: HTML5, CSS3, JavaScript, Bootstrap</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Models: BART, T5, PEGASUS</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <h4 class="mb-3">Features & Functionality</h4>
+                        <p class="text-muted">TextSummarizer offers a comprehensive solution for text summarization with an intuitive interface and customizable options.</p>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Multiple summary length options</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> User-friendly web interface</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Responsive design for all devices</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Advanced customization parameters</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Real-time text statistics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Algorithm Features Section -->
+        <section class="container mb-5">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="section-title">Algorithm Features</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <h4 class="mb-3">Text Processing</h4>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><i class="fas fa-file-alt text-primary me-2"></i> Text Tokenization & Preprocessing</li>
+                            <li class="mb-2"><i class="fas fa-sitemap text-primary me-2"></i> Semantic Analysis</li>
+                            <li class="mb-2"><i class="fas fa-chart-pie text-primary me-2"></i> Key Phrase Extraction</li>
+                            <li class="mb-2"><i class="fas fa-balance-scale text-primary me-2"></i> Sentence Importance Scoring</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card feature-card h-100 p-4">
+                        <h4 class="mb-3">Summary Generation</h4>
+                        <ul class="list-unstyled mt-3">
+                            <li class="mb-2"><i class="fas fa-compress text-primary me-2"></i> Abstractive Summarization</li>
+                            <li class="mb-2"><i class="fas fa-cogs text-primary me-2"></i> Transformer Models</li>
+                            <li class="mb-2"><i class="fas fa-sliders-h text-primary me-2"></i> Customizable Parameters</li>
+                            <li class="mb-2"><i class="fas fa-file-contract text-primary me-2"></i> Coherent Output Generation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- College Project Info -->
+        <section class="container mb-5">
+            <div class="stats-container text-center">
+                <h3 class="mb-4">College Mini-Project</h3>
+                <p class="lead text-muted mb-4">This application was developed as part of my academic curriculum to demonstrate practical implementation of natural language processing and AI in real-world applications.</p>
+                <div class="row">
+                    <div class="col-md-3 col-6 mb-3">
+                        <h2 class="stat-number">95%</h2>
+                        <p class="text-muted">Accuracy</p>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <h2 class="stat-number">NLP</h2>
+                        <p class="text-muted">Natural Language Processing</p>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <h2 class="stat-number">AI</h2>
+                        <p class="text-muted">Artificial Intelligence</p>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <h2 class="stat-number">Web</h2>
+                        <p class="text-muted">Web Development</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>TextSummarizer</h5>
+                    <p class="text-light">Using AI to create concise summaries of your text.</p>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
+                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Summarize Text</a></li>
+                        <li><a href="{{ url_for('about') }}" class="text-light text-decoration-none">About Us</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="text-light text-decoration-none">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3">Connect With Us</h5>
+                    <div>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <p class="mb-0">&copy; 2023 TextSummarizer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Back to top button
+        const backToTopButton = document.querySelector('.back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
