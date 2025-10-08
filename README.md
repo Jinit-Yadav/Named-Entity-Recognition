@@ -1,4 +1,4 @@
-# End-to-End Text-Summarizer-Project
+# End-to-End Named-Entity-Recognition
 
 ## Workflow
 
