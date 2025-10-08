@@ -22,8 +22,8 @@ data_transformation:
 
 model_trainer:
   root_dir: artifacts/model_trainer
-  data_path: artifacts/data_transformation/ner_processed_dataset  # CHANGED
-  model_ckpt: bert-base-cased  # CHANGED: Use BERT for NER
+  data_path: artifacts/data_transformation/ner_processed_dataset
+  model_ckpt: distilbert-base-cased
   num_train_epochs: 3
   learning_rate: 2e-5
   per_device_train_batch_size: 16

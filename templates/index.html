@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextSummarizer - AI Text Summarization</title>
+    <title>NER Analyzer - Named Entity Recognition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,6 +23,12 @@
             --hover-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
             --gradient-bg: linear-gradient(135deg, #2d5bff 0%, #4c1d95 100%);
             --gradient-card: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            
+            /* Entity type colors */
+            --person-color: #3b82f6;
+            --organization-color: #10b981;
+            --location-color: #f59e0b;
+            --misc-color: #8b5cf6;
         }
         
         * {
@@ -170,6 +176,56 @@
             border-radius: 2px;
         }
         
+        /* Entity type badges */
+        .entity-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 0.25rem;
+        }
+        
+        .entity-badge-person {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: var(--person-color);
+            border: 1px solid var(--person-color);
+        }
+        
+        .entity-badge-organization {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--organization-color);
+            border: 1px solid var(--organization-color);
+        }
+        
+        .entity-badge-location {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--location-color);
+            border: 1px solid var(--location-color);
+        }
+        
+        .entity-badge-miscellaneous {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: var(--misc-color);
+            border: 1px solid var(--misc-color);
+        }
+        
+        .demo-text {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .demo-entities {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
         footer {
             background: linear-gradient(135deg, #2b2d42 0%, #1a1c2d 100%);
             color: white;
@@ -194,7 +250,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-file-alt me-2"></i>TextSummarizer
+                <i class="fas fa-search me-2"></i>NER Analyzer
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -205,7 +261,7 @@
                         <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('predict') }}">Summarize</a>
+                        <a class="nav-link" href="{{ url_for('predict') }}">Analyze Text</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}">About</a>
@@ -221,9 +277,9 @@
     <!-- Hero Section -->
     <section class="hero-section text-center">
         <div class="container">
-            <h1 class="display-4 fw-bold mb-4">AI-Powered Text Summarization</h1>
-            <p class="lead mb-4">Transform lengthy documents into concise summaries using advanced natural language processing</p>
-            <a href="{{ url_for('predict') }}" class="btn btn-hero">Try Summarizer <i class="fas fa-arrow-right ms-2"></i></a>
+            <h1 class="display-4 fw-bold mb-4">AI-Powered Named Entity Recognition</h1>
+            <p class="lead mb-4">Automatically identify and extract people, organizations, locations, and more from your text using advanced natural language processing</p>
+            <a href="{{ url_for('predict') }}" class="btn btn-hero">Try NER Analyzer <i class="fas fa-arrow-right ms-2"></i></a>
         </div>
     </section>
 
@@ -231,8 +287,8 @@
     <section class="container">
         <div class="row text-center mb-5">
             <div class="col-lg-12">
-                <h2 class="section-title">Why Choose Our Summarizer</h2>
-                <p class="lead text-muted">Advanced AI technology for efficient text processing</p>
+                <h2 class="section-title">Why Choose Our NER Analyzer</h2>
+                <p class="lead text-muted">Advanced AI technology for intelligent entity extraction</p>
             </div>
         </div>
         <div class="row">
@@ -241,8 +297,8 @@
                     <div class="feature-icon">
                         <i class="fas fa-brain"></i>
                     </div>
-                    <h4>AI-Powered</h4>
-                    <p class="text-muted">Uses state-of-the-art transformer models for accurate summarization.</p>
+                    <h4>AI-Powered Detection</h4>
+                    <p class="text-muted">Uses state-of-the-art transformer models for accurate entity recognition and classification.</p>
                 </div>
             </div>
             <div class="col-md-4 mb-4">
@@ -250,17 +306,104 @@
                     <div class="feature-icon">
                         <i class="fas fa-bolt"></i>
                     </div>
-                    <h4>Fast Processing</h4>
-                    <p class="text-muted">Generate summaries in seconds, saving you valuable time.</p>
+                    <h4>Real-time Processing</h4>
+                    <p class="text-muted">Extract entities in seconds with our optimized processing pipeline.</p>
                 </div>
             </div>
             <div class="col-md-4 mb-4">
                 <div class="card feature-card h-100 p-4 text-center">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-tags"></i>
                     </div>
-                    <h4>High Accuracy</h4>
-                    <p class="text-muted">Maintains context and key information from original text.</p>
+                    <h4>Multiple Entity Types</h4>
+                    <p class="text-muted">Detect people, organizations, locations, and miscellaneous entities with high precision.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-12">
+                <h2 class="section-title">What We Detect</h2>
+                <p class="lead text-muted">Our system identifies various types of named entities</p>
+            </div>
+        </div>
+        <div class="demo-entities">
+            <span class="entity-badge entity-badge-person">
+                <i class="fas fa-user me-1"></i>People
+            </span>
+            <span class="entity-badge entity-badge-organization">
+                <i class="fas fa-building me-1"></i>Organizations
+            </span>
+            <span class="entity-badge entity-badge-location">
+                <i class="fas fa-map-marker-alt me-1"></i>Locations
+            </span>
+            <span class="entity-badge entity-badge-miscellaneous">
+                <i class="fas fa-tag me-1"></i>Miscellaneous
+            </span>
+        </div>
+        
+        <div class="demo-text">
+            <h4 class="text-center mb-3">Example Analysis</h4>
+            <p class="text-center text-muted mb-4">See how our NER system works with sample text</p>
+            <div class="text-center">
+                <p><strong>Input Text:</strong> "Apple Inc. announced that Tim Cook will visit London next month to meet with European regulators."</p>
+                <p><strong>Detected Entities:</strong></p>
+                <div class="demo-entities">
+                    <span class="entity-badge entity-badge-organization">Apple Inc.</span>
+                    <span class="entity-badge entity-badge-person">Tim Cook</span>
+                    <span class="entity-badge entity-badge-location">London</span>
+                    <span class="entity-badge entity-badge-miscellaneous">European</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-12">
+                <h2 class="section-title">Use Cases</h2>
+                <p class="lead text-muted">Applications across various domains</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="feature-icon text-center">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h4 class="text-center">News Analysis</h4>
+                    <p class="text-muted text-center">Extract key entities from news articles for content analysis and trend monitoring.</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="feature-icon text-center">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h4 class="text-center">Document Processing</h4>
+                    <p class="text-muted text-center">Automate entity extraction from legal documents, reports, and business contracts.</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="feature-icon text-center">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h4 class="text-center">Data Mining</h4>
+                    <p class="text-muted text-center">Build knowledge graphs and structured databases from unstructured text data.</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="feature-icon text-center">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4 class="text-center">Content Tagging</h4>
+                    <p class="text-muted text-center">Automatically tag and categorize content for improved search and organization.</p>
                 </div>
             </div>
         </div>
@@ -268,9 +411,9 @@
 
     <!-- CTA Section -->
     <section class="container text-center py-5">
-        <h2 class="fw-bold mb-3">Ready to Summarize Your Text?</h2>
-        <p class="lead text-muted mb-4">Try our AI summarizer now and experience efficient text processing</p>
-        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg px-5 py-3">Start Summarizing <i class="fas fa-arrow-right ms-2"></i></a>
+        <h2 class="fw-bold mb-3">Ready to Analyze Your Text?</h2>
+        <p class="lead text-muted mb-4">Try our NER analyzer now and discover the entities in your text</p>
+        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg px-5 py-3">Start Analyzing <i class="fas fa-arrow-right ms-2"></i></a>
     </section>
 
     
@@ -279,14 +422,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>TextSummarizer</h5>
-                    <p class="text-light">Using AI to create concise summaries of your text.</p>
+                    <h5 class="mb-3"><i class="fas fa-search me-2"></i>NER Analyzer</h5>
+                    <p class="text-light">Using AI to identify named entities in your text.</p>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a class="nav-link active" href="{{ url_for('index') }}">Home</a></li>
-                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Summarize Text</a></li>
+                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Analyze Text</a></li>
                         <li><a href="{{ url_for('about') }}" class="text-light text-decoration-none">About Us</a></li>
                         <li><a href="{{ url_for('contact') }}" class="text-light text-decoration-none">Contact</a></li>
                     </ul>
@@ -302,7 +445,7 @@
                 </div>
             </div>
             <hr class="my-4 bg-light">
-            <p class="mb-0">&copy; 2025 TextSummarizer. All rights reserved.</p>
+            <p class="mb-0">&copy; 2025 NER Analyzer. All rights reserved.</p>
         </div>
     </footer>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - TextSummarizer</title>
+    <title>About - NER Analyzer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -350,6 +350,13 @@
             width: 100%;
         }
         
+        /* Entity type color coding */
+        .entity-person { color: #e74c3c; }
+        .entity-organization { color: #3498db; }
+        .entity-location { color: #2ecc71; }
+        .entity-date { color: #f39c12; }
+        .entity-misc { color: #9b59b6; }
+        
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .hero-section {
@@ -372,7 +379,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-file-alt me-2"></i>TextSummarizer
+                <i class="fas fa-tag me-2"></i>NER Analyzer
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -383,7 +390,7 @@
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('predict') }}">Summarize</a>
+                        <a class="nav-link" href="{{ url_for('predict') }}">Analyze</a>
                     </li>
                     <li class="nav-item">
                           <a class="nav-link active" href="{{ url_for('about') }}">About</a>
@@ -405,8 +412,8 @@
                 <div class="shape shape-2"></div>
             </div>
             <div class="container hero-content">
-                <h1 class="display-4 fw-bold mb-4">About TextSummarizer</h1>
-                <p class="lead mb-4">Learn about our mission, how our text summarization system works, and the developer behind this project</p>
+                <h1 class="display-4 fw-bold mb-4">About NER Analyzer</h1>
+                <p class="lead mb-4">Learn about our mission, how our Named Entity Recognition system works, and the developer behind this project</p>
             </div>
         </section>
 
@@ -424,7 +431,7 @@
                             <i class="fas fa-bullseye"></i>
                         </div>
                         <h4>Our Mission</h4>
-                        <p class="text-muted">TextSummarizer aims to revolutionize how people consume information by using advanced AI to create concise, accurate summaries of lengthy text. Our goal is to help students, researchers, and professionals save time while maintaining comprehension of important content.</p>
+                        <p class="text-muted">NER Analyzer aims to help users extract meaningful information from text by identifying and classifying named entities. Our goal is to assist researchers, data analysts, and developers in processing large volumes of text data efficiently and accurately.</p>
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
@@ -433,7 +440,7 @@
                             <i class="fas fa-lightbulb"></i>
                         </div>
                         <h4>How It Works</h4>
-                        <p class="text-muted">Our system uses state-of-the-art natural language processing and transformer models to analyze text, identify key concepts, and generate coherent summaries. The algorithm preserves the original meaning while significantly reducing text length, making information consumption more efficient.</p>
+                        <p class="text-muted">Our system uses state-of-the-art transformer models to analyze text, identify named entities, and classify them into predefined categories such as persons, organizations, locations, dates, and more. The algorithm provides confidence scores for each identified entity.</p>
                     </div>
                 </div>
             </div>
@@ -452,7 +459,7 @@
                         <img src="{{ url_for('static', filename='images/img.png') }}" alt="Developer" class="developer-img">
                         <h3>Jinit Yadav</h3>
                         <p class="text-muted">Data Science Student & Developer</p>
-                        <p>I'm a passionate data science student with a strong interest in natural language processing and AI applications. This project combines my technical skills with my desire to create solutions that can make information more accessible and digestible for everyone.</p>
+                        <p>I'm a passionate data science student with a strong interest in natural language processing and AI applications. This project combines my technical skills with my desire to create solutions that can help extract valuable information from unstructured text data.</p>
                         
                         <div class="tech-stack">
                             <span class="tech-item">Python</span>
@@ -485,58 +492,58 @@
                 <div class="col-md-6 mb-4">
                     <div class="card feature-card h-100 p-4">
                         <h4 class="mb-3">Technical Implementation</h4>
-                        <p class="text-muted">This project was built using a Flask backend with transformer models for text summarization. The frontend utilizes Bootstrap for responsive design and custom CSS for the unique visual style.</p>
+                        <p class="text-muted">This project was built using a Flask backend with transformer models for Named Entity Recognition. The frontend utilizes Bootstrap for responsive design and custom CSS for the unique visual style.</p>
                         <ul class="list-unstyled mt-3">
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> NLP: Transformers, Hugging Face, NLTK</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> NLP: Transformers, Hugging Face, spaCy</li>
                             <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Backend: Python, Flask</li>
                             <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Frontend: HTML5, CSS3, JavaScript, Bootstrap</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Models: BART, T5, PEGASUS</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Models: BERT, RoBERTa, spaCy Models</li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-4">
                     <div class="card feature-card h-100 p-4">
                         <h4 class="mb-3">Features & Functionality</h4>
-                        <p class="text-muted">TextSummarizer offers a comprehensive solution for text summarization with an intuitive interface and customizable options.</p>
+                        <p class="text-muted">NER Analyzer offers a comprehensive solution for entity extraction with an intuitive interface and customizable options.</p>
                         <ul class="list-unstyled mt-3">
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Multiple summary length options</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> User-friendly web interface</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Responsive design for all devices</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Advanced customization parameters</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Real-time text statistics</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Multiple entity type recognition</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Confidence threshold adjustment</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Entity statistics and visualization</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> API access for developers</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Real-time text analysis</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Algorithm Features Section -->
+        <!-- Entity Types Section -->
         <section class="container mb-5">
             <div class="row">
                 <div class="col-lg-12 text-center mb-5">
-                    <h2 class="section-title">Algorithm Features</h2>
+                    <h2 class="section-title">Entity Types Recognized</h2>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-4">
                     <div class="card feature-card h-100 p-4">
-                        <h4 class="mb-3">Text Processing</h4>
+                        <h4 class="mb-3">Common Entity Categories</h4>
                         <ul class="list-unstyled mt-3">
-                            <li class="mb-2"><i class="fas fa-file-alt text-primary me-2"></i> Text Tokenization & Preprocessing</li>
-                            <li class="mb-2"><i class="fas fa-sitemap text-primary me-2"></i> Semantic Analysis</li>
-                            <li class="mb-2"><i class="fas fa-chart-pie text-primary me-2"></i> Key Phrase Extraction</li>
-                            <li class="mb-2"><i class="fas fa-balance-scale text-primary me-2"></i> Sentence Importance Scoring</li>
+                            <li class="mb-2"><i class="fas fa-user entity-person me-2"></i> <strong>Person</strong> - Names of people</li>
+                            <li class="mb-2"><i class="fas fa-building entity-organization me-2"></i> <strong>Organization</strong> - Companies, institutions</li>
+                            <li class="mb-2"><i class="fas fa-map-marker-alt entity-location me-2"></i> <strong>Location</strong> - Geographical places</li>
+                            <li class="mb-2"><i class="fas fa-calendar entity-date me-2"></i> <strong>Date/Time</strong> - Specific dates and times</li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-md-6 mb-4">
                     <div class="card feature-card h-100 p-4">
-                        <h4 class="mb-3">Summary Generation</h4>
+                        <h4 class="mb-3">Additional Categories</h4>
                         <ul class="list-unstyled mt-3">
-                            <li class="mb-2"><i class="fas fa-compress text-primary me-2"></i> Abstractive Summarization</li>
-                            <li class="mb-2"><i class="fas fa-cogs text-primary me-2"></i> Transformer Models</li>
-                            <li class="mb-2"><i class="fas fa-sliders-h text-primary me-2"></i> Customizable Parameters</li>
-                            <li class="mb-2"><i class="fas fa-file-contract text-primary me-2"></i> Coherent Output Generation</li>
+                            <li class="mb-2"><i class="fas fa-money-bill-wave entity-misc me-2"></i> <strong>Monetary Values</strong> - Currency amounts</li>
+                            <li class="mb-2"><i class="fas fa-percentage entity-misc me-2"></i> <strong>Percentages</strong> - Percentage values</li>
+                            <li class="mb-2"><i class="fas fa-hashtag entity-misc me-2"></i> <strong>Miscellaneous</strong> - Other named entities</li>
+                            <li class="mb-2"><i class="fas fa-cog entity-misc me-2"></i> <strong>Custom Entities</strong> - Domain-specific entities</li>
                         </ul>
                     </div>
                 </div>
@@ -554,8 +561,8 @@
                         <p class="text-muted">Accuracy</p>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
-                        <h2 class="stat-number">NLP</h2>
-                        <p class="text-muted">Natural Language Processing</p>
+                        <h2 class="stat-number">NER</h2>
+                        <p class="text-muted">Named Entity Recognition</p>
                     </div>
                     <div class="col-md-3 col-6 mb-3">
                         <h2 class="stat-number">AI</h2>
@@ -574,14 +581,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>TextSummarizer</h5>
-                    <p class="text-light">Using AI to create concise summaries of your text.</p>
+                    <h5 class="mb-3"><i class="fas fa-tag me-2"></i>NER Analyzer</h5>
+                    <p class="text-light">Using AI to extract entities from your text.</p>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
-                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Summarize Text</a></li>
+                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Analyze Text</a></li>
                         <li><a class="nav-link active" href="{{ url_for('about') }}">About Us</a></li>
                         <li><a href="{{ url_for('contact') }}" class="text-light text-decoration-none">Contact</a></li>
                     </ul>
@@ -597,7 +604,7 @@
                 </div>
             </div>
             <hr class="my-4 bg-light">
-            <p class="mb-0">&copy; 2025 TextSummarizer. All rights reserved.</p>
+            <p class="mb-0">&copy; 2025 NER Analyzer. All rights reserved.</p>
         </div>
     </footer>
 

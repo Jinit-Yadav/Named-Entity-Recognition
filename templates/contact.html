@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextSummarizer - Contact Us</title>
+    <title>NER Analyzer - Contact Us</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -373,7 +373,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-file-alt me-2"></i>TextSummarizer
+                <i class="fas fa-tags me-2"></i>NER Analyzer
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -384,7 +384,7 @@
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('predict') }}">Summarize</a>
+                        <a class="nav-link" href="{{ url_for('predict') }}">Analyze Text</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}">About</a>
@@ -405,7 +405,7 @@
         </div>
         <div class="container hero-content">
             <h1 class="display-4 fw-bold mb-4">Contact Us</h1>
-            <p class="lead mb-4">Have questions or feedback? We'd love to hear from you</p>
+            <p class="lead mb-4">Have questions about Named Entity Recognition? We're here to help</p>
         </div>
     </section>
 
@@ -508,14 +508,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>TextSummarizer</h5>
-                    <p class="text-light">Using AI to create concise summaries of your text.</p>
+                    <h5 class="mb-3"><i class="fas fa-tags me-2"></i>NER Analyzer</h5>
+                    <p class="text-light">Using AI to extract named entities from your text with precision.</p>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
-                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Summarize Text</a></li>
+                        <li><a href="{{ url_for('predict') }}" class="text-light text-decoration-none">Analyze Text</a></li>
                         <li><a href="{{ url_for('about') }}" class="text-light text-decoration-none">About Us</a></li>
                         <li><a class="nav-link active" href="{{ url_for('contact') }}">Contact</a></li>
                     </ul>
@@ -531,7 +531,7 @@
                 </div>
             </div>
             <hr class="my-4 bg-light">
-            <p class="mb-0">&copy; 2025 TextSummarizer. All rights reserved.</p>
+            <p class="mb-0">&copy; 2025 NER Analyzer. All rights reserved.</p>
         </div>
     </footer>
 

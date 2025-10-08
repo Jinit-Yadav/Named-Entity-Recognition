@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextSummarizer - AI Text Summarization Tool</title>
+    <title>NER Analyzer - Named Entity Recognition Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,6 +23,12 @@
             --hover-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
             --gradient-bg: linear-gradient(135deg, #2d5bff 0%, #4c1d95 100%);
             --gradient-card: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            
+            /* Entity type colors */
+            --person-color: #3b82f6;
+            --organization-color: #10b981;
+            --location-color: #f59e0b;
+            --misc-color: #8b5cf6;
         }
         
         * {
@@ -109,8 +115,8 @@
             color: var(--primary);
         }
         
-        .summarizer {
-            max-width: 1200px; /* Increased from 950px */
+        .ner-analyzer {
+            max-width: 1200px;
             margin: 2rem auto;
             padding: 3rem;
             background: white;
@@ -120,7 +126,7 @@
             overflow: hidden;
         }
         
-        .summarizer::before {
+        .ner-analyzer::before {
             content: '';
             position: absolute;
             top: 0;
@@ -166,21 +172,20 @@
             background: linear-gradient(135deg, var(--primary-dark) 0%, #3a1680 100%);
         }
         
-        /* Updated text-box styles to ensure full width */
         .text-box {
             border-radius: 12px;
             border: 2px solid #e9ecef;
             padding: 1.5rem;
-            min-height: 300px; /* Increased height */
-            max-height: 500px; /* Increased max height */
+            min-height: 300px;
+            max-height: 500px;
             overflow-y: auto;
             background-color: #f8f9fa;
             font-size: 1rem;
             line-height: 1.6;
             position: relative;
-            width: 100%; /* Ensure full width */
-            min-width: 100%; /* force full width */
-            display: block; /* Ensure it behaves as a block element */
+            width: 100%;
+            min-width: 100%;
+            display: block;
         }
         
         .text-box:focus {
@@ -189,23 +194,21 @@
             outline: none;
         }
         
-        /* Updated placeholder styling */
         .text-box.placeholder {
             position: relative;
         }
         
         .text-box.placeholder::before {
-            content: 'Paste or type your text here...';
+            content: 'Paste or type your text here to analyze for named entities...';
             position: absolute;
             top: 1.5rem;
             left: 1.5rem;
             color: #6c757d;
             pointer-events: none;
             font-style: italic;
-            width: calc(100% - 3rem); /* span full width minus padding */
+            width: calc(100% - 3rem);
         }
         
-        /* Ensure the actual content takes full width */
         .text-box-content {
             display: block;
             width: 100%;
@@ -220,26 +223,103 @@
             color: var(--light-text);
         }
         
-        .summary-result {
-            background: linear-gradient(135deg, var(--success) 0%, #0da271 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin-top: 2.5rem;
-            text-align: center;
-            font-size: 1.2rem;
+        /* Entity highlighting styles */
+        .entity-highlight {
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 1px;
             font-weight: 500;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-            text-align: left;
-            line-height: 1.8;
-            /* REMOVED: display: none; */
-            /* ADDED: Initially hidden but will be shown when content exists */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .entity-highlight:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .entity-person {
+            background-color: rgba(59, 130, 246, 0.15);
+            border: 1px solid var(--person-color);
+            color: var(--person-color);
+        }
+        
+        .entity-organization {
+            background-color: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--organization-color);
+            color: var(--organization-color);
+        }
+        
+        .entity-location {
+            background-color: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--location-color);
+            color: var(--location-color);
+        }
+        
+        .entity-miscellaneous {
+            background-color: rgba(139, 92, 246, 0.15);
+            border: 1px solid var(--misc-color);
+            color: var(--misc-color);
+        }
+        
+        .entity-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-text);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .entity-highlight:hover .entity-tooltip {
+            opacity: 1;
+            visibility: visible;
+            bottom: calc(100% + 5px);
+        }
+        
+        .entity-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--dark-text);
+        }
+        
+        /* Results section */
+        .results-section {
+            margin-top: 2.5rem;
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
         
-        .summary-header {
+        .results-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .entities-list {
+            background: linear-gradient(135deg, var(--success) 0%, #0da271 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .entities-header {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -248,22 +328,77 @@
             font-weight: 700;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .entity-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
         }
-
+        
+        .entity-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .entity-item-person {
+            border-left-color: var(--person-color);
+        }
+        
+        .entity-item-organization {
+            border-left-color: var(--organization-color);
+        }
+        
+        .entity-item-location {
+            border-left-color: var(--location-color);
+        }
+        
+        .entity-item-miscellaneous {
+            border-left-color: var(--misc-color);
+        }
+        
+        .entity-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .entity-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .statistics-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
         .original-text {
-            margin-top: 2rem;
+            margin-top: 1rem;
             padding: 1.5rem;
             background-color: #f8f9fa;
             border-radius: 12px;
             border-left: 4px solid var(--primary);
-            /* REMOVED: display: none; */
-            /* ADDED: Initially hidden but will be shown when content exists */
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
         
         .original-text h5 {
@@ -451,7 +586,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Wider text area container */
         .text-input-container {
             width: 100%;
             max-width: 100%; 
@@ -460,7 +594,7 @@
         
         /* Responsive adjustments */
         @media (max-width: 1200px) {
-            .summarizer {
+            .ner-analyzer {
                 max-width: 95%;
                 margin: 2rem auto;
                 padding: 2rem;
@@ -477,7 +611,7 @@
                 font-size: 2.2rem;
             }
             
-            .summarizer {
+            .ner-analyzer {
                 padding: 1.5rem;
                 margin: 1.5rem auto;
             }
@@ -489,7 +623,7 @@
         }
         
         @media (max-width: 576px) {
-            .summarizer {
+            .ner-analyzer {
                 padding: 1rem;
                 margin: 1rem auto;
             }
@@ -507,7 +641,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-file-alt me-2"></i>TextSummarizer
+                <i class="fas fa-search me-2"></i>NER Analyzer
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -518,7 +652,7 @@
                         <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('predict') }}">Summarize</a>
+                        <a class="nav-link active" href="{{ url_for('predict') }}">Analyze Text</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}">About</a>
@@ -532,19 +666,15 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid"> <!-- Changed to container-fluid for full width -->
-        <!-- Text Summarization Section -->
-        <div class="summarizer mt-4">
-            <div class="decoration-dots">
-                <!-- Decorative dots will be added via JavaScript -->
-            </div>
+    <div class="container-fluid">
+        <!-- NER Analysis Section -->
+        <div class="ner-analyzer mt-4">
+            <h2 class="text-center mb-4">Named Entity Recognition Tool</h2>
+            <p class="text-center text-muted mb-5">Paste your text below to identify people, organizations, locations, and more</p>
             
-            <h2 class="text-center mb-4">AI Text Summarization Tool</h2>
-            <p class="text-center text-muted mb-5">Paste your text below to generate a concise summary</p>
-            
-            <form id="summary-form" method="POST" action="{{ url_for('predict') }}">
-                <div class="text-input-container"> <!-- New container for better width control -->
-                    <label for="text" class="form-label">Text to Summarize</label>
+            <form id="ner-form" method="POST" action="{{ url_for('predict') }}">
+                <div class="text-input-container">
+                    <label for="text" class="form-label">Text to Analyze</label>
                     <div class="position-relative">
                         <div class="text-box placeholder" contenteditable="true" id="text" name="text"></div>
                         <div class="text-stats">
@@ -566,62 +696,30 @@
                             <div class="col-md-6">
                                 <div class="param-control">
                                     <div class="param-label">
-                                        <span>Length Penalty</span>
-                                        <span class="param-value" id="length-penalty-value">2.0</span>
+                                        <span>Confidence Threshold</span>
+                                        <span class="param-value" id="confidence-threshold-value">0.7</span>
                                     </div>
                                     <div class="slider-container">
-                                        <input type="range" min="0.5" max="3.0" step="0.1" value="2.0" class="slider" id="length-penalty" name="length_penalty">
+                                        <input type="range" min="0.1" max="1.0" step="0.1" value="0.7" class="slider" id="confidence-threshold" name="confidence_threshold">
                                     </div>
                                     <div class="slider-labels">
-                                        <span>Shorter</span>
-                                        <span>Longer</span>
+                                        <span>More Entities</span>
+                                        <span>Higher Quality</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="param-control">
                                     <div class="param-label">
-                                        <span>Number of Beams</span>
-                                        <span class="param-value" id="num-beams-value">6</span>
+                                        <span>Max Entities</span>
+                                        <span class="param-value" id="max-entities-value">50</span>
                                     </div>
                                     <div class="slider-container">
-                                        <input type="range" min="2" max="12" step="1" value="6" class="slider" id="num-beams" name="num_beams">
+                                        <input type="range" min="1" max="200" step="1" value="50" class="slider" id="max-entities" name="max_entities">
                                     </div>
                                     <div class="slider-labels">
-                                        <span>Faster</span>
-                                        <span>Better Quality</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="param-control">
-                                    <div class="param-label">
-                                        <span>Max Length</span>
-                                        <span class="param-value" id="max-length-value">200</span>
-                                    </div>
-                                    <div class="slider-container">
-                                        <input type="range" min="50" max="500" step="10" value="200" class="slider" id="max-length" name="max_length">
-                                    </div>
-                                    <div class="slider-labels">
-                                        <span>Shorter</span>
-                                        <span>Longer</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="param-control">
-                                    <div class="param-label">
-                                        <span>Min Length</span>
-                                        <span class="param-value" id="min-length-value">80</span>
-                                    </div>
-                                    <div class="slider-container">
-                                        <input type="range" min="20" max="300" step="5" value="80" class="slider" id="min-length" name="min_length">
-                                    </div>
-                                    <div class="slider-labels">
-                                        <span>Shorter</span>
-                                        <span>Longer</span>
+                                        <span>Fewer</span>
+                                        <span>More</span>
                                     </div>
                                 </div>
                             </div>
@@ -631,32 +729,86 @@
                 
                 <div class="loading-spinner" id="loading-spinner">
                     <div class="spinner"></div>
-                    <p class="mt-2">Generating summary...</p>
+                    <p class="mt-2">Analyzing text for entities...</p>
                 </div>
                 
-                <button type="submit" class="btn btn-primary mt-3">Generate Summary</button>
+                <button type="submit" class="btn btn-primary mt-3">Analyze Text</button>
             </form>
             
-            {% if summary is defined and summary %}
-            <div class="summary-result mt-4" id="summary-result" style="display: block; opacity: 1; transform: translateY(0);">
-                <div class="summary-header">
-                    <i class="fas fa-file-contract me-2"></i>Summary
+            {% if entities is defined and entities %}
+            <div class="results-section show" id="results-section">
+                <!-- Entity Statistics -->
+                {% if entity_statistics %}
+                <div class="statistics-section">
+                    <h4 class="text-center mb-4">Analysis Summary</h4>
+                    <div class="row">
+                        <div class="col-md-3 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ entity_statistics.total_entities }}</div>
+                                <div class="stat-label">Total Entities</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ entity_statistics.average_confidence }}</div>
+                                <div class="stat-label">Avg Confidence</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ entity_statistics.entities_by_type.get('PERSON', 0) }}</div>
+                                <div class="stat-label">People</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ entity_statistics.entities_by_type.get('ORGANIZATION', 0) }}</div>
+                                <div class="stat-label">Organizations</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="summary-content" id="summary-content">
-                    {{ summary }}
+                {% endif %}
+                
+                <!-- Entities List -->
+                <div class="entities-list">
+                    <div class="entities-header">
+                        <i class="fas fa-list-ul me-2"></i>Detected Entities
+                    </div>
+                    <div id="entities-content">
+                        {% for entity in entities %}
+                        <div class="entity-item entity-item-{{ entity.type.lower() }}">
+                            <div class="entity-text">{{ entity.text }}</div>
+                            <div class="entity-details">
+                                <span>Type: {{ entity.type }}</span>
+                                <span>Confidence: {{ entity.confidence }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-            {% endif %}
 
-            {% if original_text is defined and original_text %}
-            <div class="original-text" id="original-text" style="display: block; opacity: 1; transform: translateY(0);">
-                <h5>Original Text</h5>
-                <div id="original-text-content">
-                    {{ original_text }}
+                <!-- Highlighted Text -->
+                <div class="original-text" id="highlighted-text">
+                    <h5>Text with Entity Highlights</h5>
+                    <div id="highlighted-text-content">
+                        {% set text = original_text %}
+                        {% for entity in entities|sort(attribute='start_pos', reverse=true) %}
+                            {% set start = entity.start_pos %}
+                            {% set end = entity.end_pos %}
+                            {% set entity_text = entity.text %}
+                            {% set entity_type = entity.type.lower() %}
+                            {% set confidence = entity.confidence %}
+                            
+                            {% set before = text[:start] %}
+                            {% set after = text[end:] %}
+                            {% set highlighted = '<span class="entity-highlight entity-' + entity_type + '">' + entity_text + '<span class="entity-tooltip">' + entity.type + ' (' + confidence|string + ')</span></span>' %}
+                            
+                            {% set text = before + highlighted + after %}
+                        {% endfor %}
+                        {{ text|safe }}
+                    </div>
                 </div>
-                <button class="toggle-btn" id="toggle-original">
-                    <i class="fas fa-chevron-up"></i> Hide Original Text
-                </button>
             </div>
             {% endif %}
 
@@ -668,14 +820,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>TextSummarizer</h5>
-                    <p class="text-light">Using AI to create concise summaries of your text.</p>
+                    <h5 class="mb-3"><i class="fas fa-search me-2"></i>NER Analyzer</h5>
+                    <p class="text-light">Using AI to identify named entities in your text.</p>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('index') }}" class="text-light text-decoration-none">Home</a></li>
-                        <li><a class="nav-link active" href="{{ url_for('predict') }}">Summarize Text</a></li>
+                        <li><a class="nav-link active" href="{{ url_for('predict') }}">Analyze Text</a></li>
                         <li><a href="{{ url_for('about') }}" class="text-light text-decoration-none">About Us</a></li>
                         <li><a href="{{ url_for('contact') }}" class="text-light text-decoration-none">Contact</a></li>
                     </ul>
@@ -691,7 +843,7 @@
                 </div>
             </div>
             <hr class="my-4 bg-light">
-            <p class="mb-0">&copy; 2025 TextSummarizer. All rights reserved.</p>
+            <p class="mb-0">&copy; 2025 NER Analyzer. All rights reserved.</p>
         </div>
     </footer>
 
@@ -782,42 +934,36 @@
         }
     });
     
-    // Parameter sliders
-    const lengthPenaltySlider = document.getElementById('length-penalty');
-    const numBeamsSlider = document.getElementById('num-beams');
-    const maxLengthSlider = document.getElementById('max-length');
-    const minLengthSlider = document.getElementById('min-length');
+    // Parameter sliders for NER
+    const confidenceThresholdSlider = document.getElementById('confidence-threshold');
+    const maxEntitiesSlider = document.getElementById('max-entities');
     
-    const lengthPenaltyValue = document.getElementById('length-penalty-value');
-    const numBeamsValue = document.getElementById('num-beams-value');
-    const maxLengthValue = document.getElementById('max-length-value');
-    const minLengthValue = document.getElementById('min-length-value');
+    const confidenceThresholdValue = document.getElementById('confidence-threshold-value');
+    const maxEntitiesValue = document.getElementById('max-entities-value');
     
-    lengthPenaltySlider.addEventListener('input', function() {
-        lengthPenaltyValue.textContent = this.value;
+    confidenceThresholdSlider.addEventListener('input', function() {
+        confidenceThresholdValue.textContent = this.value;
     });
     
-    numBeamsSlider.addEventListener('input', function() {
-        numBeamsValue.textContent = this.value;
-    });
-    
-    maxLengthSlider.addEventListener('input', function() {
-        maxLengthValue.textContent = this.value;
-    });
-    
-    minLengthSlider.addEventListener('input', function() {
-        minLengthValue.textContent = this.value;
+    maxEntitiesSlider.addEventListener('input', function() {
+        maxEntitiesValue.textContent = this.value;
     });
     
     // Form submission with loading animation
-    const form = document.getElementById('summary-form');
+    const form = document.getElementById('ner-form');
     const loadingSpinner = document.getElementById('loading-spinner');
     
     if (form) {
         form.addEventListener('submit', function(e) {
             const text = hiddenText.value.trim();
             if (!text) {
-                alert('Please enter some text to summarize.');
+                alert('Please enter some text to analyze.');
+                e.preventDefault();
+                return;
+            }
+            
+            if (text.length < 10) {
+                alert('Please enter at least 10 characters for analysis.');
                 e.preventDefault();
                 return;
             }
@@ -826,53 +972,29 @@
             loadingSpinner.style.display = 'block';
             
             // Add hidden inputs for parameters
-            const lengthPenaltyInput = document.createElement('input');
-            lengthPenaltyInput.type = 'hidden';
-            lengthPenaltyInput.name = 'length_penalty';
-            lengthPenaltyInput.value = lengthPenaltySlider.value;
-            form.appendChild(lengthPenaltyInput);
+            const confidenceInput = document.createElement('input');
+            confidenceInput.type = 'hidden';
+            confidenceInput.name = 'confidence_threshold';
+            confidenceInput.value = confidenceThresholdSlider.value;
+            form.appendChild(confidenceInput);
             
-            const numBeamsInput = document.createElement('input');
-            numBeamsInput.type = 'hidden';
-            numBeamsInput.name = 'num_beams';
-            numBeamsInput.value = numBeamsSlider.value;
-            form.appendChild(numBeamsInput);
-            
-            const maxLengthInput = document.createElement('input');
-            maxLengthInput.type = 'hidden';
-            maxLengthInput.name = 'max_length';
-            maxLengthInput.value = maxLengthSlider.value;
-            form.appendChild(maxLengthInput);
-            
-            const minLengthInput = document.createElement('input');
-            minLengthInput.type = 'hidden';
-            minLengthInput.name = 'min_length';
-            minLengthInput.value = minLengthSlider.value;
-            form.appendChild(minLengthInput);
+            const maxEntitiesInput = document.createElement('input');
+            maxEntitiesInput.type = 'hidden';
+            maxEntitiesInput.name = 'max_entities';
+            maxEntitiesInput.value = maxEntitiesSlider.value;
+            form.appendChild(maxEntitiesInput);
         });
     }
     
-    // Toggle original text visibility
-    const toggleOriginalBtn = document.getElementById('toggle-original');
-    if (toggleOriginalBtn) {
-        let originalTextVisible = true;
-        toggleOriginalBtn.addEventListener('click', function() {
-            const originalTextContent = document.getElementById('original-text-content');
-            const icon = this.querySelector('i');
-            
-            if (originalTextVisible) {
-                originalTextContent.style.display = 'none';
-                icon.className = 'fas fa-chevron-down';
-                this.innerHTML = '<i class="fas fa-chevron-down"></i> Show Original Text';
-            } else {
-                originalTextContent.style.display = 'block';
-                icon.className = 'fas fa-chevron-up';
-                this.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Original Text';
-            }
-            
-            originalTextVisible = !originalTextVisible;
-        });
-    }
+    // Show results section if entities exist
+    {% if entities %}
+    document.addEventListener('DOMContentLoaded', function() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+            resultsSection.classList.add('show');
+        }
+    });
+    {% endif %}
 </script>
 </body>
 </html>

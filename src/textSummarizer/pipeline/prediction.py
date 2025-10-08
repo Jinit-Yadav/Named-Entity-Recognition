@@ -4,19 +4,13 @@ import os
 # Add src folder to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 from textSummarizer.config.configuration import ConfigurationManager
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForTokenClassification
 import torch
 import re
 import logging
-from typing import Dict, Any, Optional
-import nltk
-from nltk.tokenize import sent_tokenize
-
-# Download required NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+from typing import Dict, Any, List, Optional
+import numpy as np
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -32,138 +26,59 @@ class PredictionPipeline:
                 self.config.tokenizer_path, 
                 local_files_only=True
             )
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(
+            self.model = AutoModelForTokenClassification.from_pretrained(
                 self.config.model_path,
                 local_files_only=True
             )
             self.model.to(self.device)
             self.model.eval()
             
-            logger.info("Model and tokenizer loaded successfully")
+            # Define label mappings for CoNLL-2003
+            self.label_list = [
+                "O",        # 0: Outside
+                "B-PER",    # 1: Beginning of Person
+                "I-PER",    # 2: Inside of Person  
+                "B-ORG",    # 3: Beginning of Organization
+                "I-ORG",    # 4: Inside of Organization
+                "B-LOC",    # 5: Beginning of Location
+                "I-LOC",    # 6: Inside of Location
+                "B-MISC",   # 7: Beginning of Miscellaneous
+                "I-MISC"    # 8: Inside of Miscellaneous
+            ]
+            
+            # Map to readable entity types
+            self.entity_type_map = {
+                "PER": "PERSON",
+                "ORG": "ORGANIZATION", 
+                "LOC": "LOCATION",
+                "MISC": "MISCELLANEOUS"
+            }
+            
+            logger.info("NER model and tokenizer loaded successfully")
             
         except Exception as e:
-            logger.error(f"Error initializing pipeline: {str(e)}")
+            logger.error(f"Error initializing NER pipeline: {str(e)}")
             raise
     
     def clean_text(self, text: str) -> str:
-        """Thoroughly clean input text"""
+        """Clean input text for NER processing"""
         if not text or len(text.strip()) == 0:
             return ""
-        
-        # Remove Wikipedia citations like [1], [a], etc.
-        text = re.sub(r'\[\d+\]', '', text)
-        text = re.sub(r'\[[a-z]\]', '', text)
         
         # Remove extra whitespace and normalize
         text = re.sub(r'\s+', ' ', text.strip())
         
-        # Fix common formatting issues
-        text = re.sub(r'\s*\.\s*', '. ', text)
-        text = re.sub(r'\s*,\s*', ', ', text)
-        
         return text
     
-    def extract_key_sentences(self, text: str, num_sentences: int = 5) -> str:
-        """Extract key sentences as a fallback when model fails"""
-        try:
-            sentences = sent_tokenize(text)
-            if len(sentences) <= num_sentences:
-                return text
-            
-            # Simple heuristic: take first, middle, and last sentences
-            key_indices = [0, len(sentences)//3, 2*len(sentences)//3, -1]
-            key_sentences = [sentences[i] for i in key_indices if i < len(sentences)]
-            
-            return ' '.join(key_sentences)
-        except:
-            return text[:500]  # Fallback to first 500 chars
-    
-    def postprocess_summary(self, summary: str) -> str:
-        """Aggressive post-processing to fix model output"""
-        if not summary or len(summary.strip()) == 0:
-            return "Unable to generate summary. Please try with different text or parameters."
+    def predict(self, text: str, **gen_kwargs) -> List[Dict]:
+        """Perform Named Entity Recognition on input text"""
         
-        # Remove extra whitespace
-        summary = re.sub(r'\s+', ' ', summary.strip())
-        
-        # Fix the specific issues seen in your output
-        summary = re.sub(r'\.\.+', '.', summary)  # Fix multiple dots
-        summary = re.sub(r'\s*\.\s*', '. ', summary)  # Ensure space after dots
-        summary = re.sub(r',\s*,', ',', summary)  # Fix multiple commas
-        summary = re.sub(r'\s*,\s*', ', ', summary)  # Ensure space after commas
-        
-        # Remove isolated words and fragments (like "I.A. at. a.. (.")
-        summary = re.sub(r'\b[A-Z]\.\s*[A-Z]?\.?\s*[a-z]?\.?', '', summary)
-        summary = re.sub(r'\s*\.\s*\.\s*', '. ', summary)
-        
-        # Fix sentence casing and structure
-        sentences = []
-        for sentence in re.split(r'(?<=[.!?])\s+', summary):
-            sentence = sentence.strip()
-            if not sentence:
-                continue
-                
-            # Remove very short fragments (likely artifacts)
-            if len(sentence.split()) < 3:
-                continue
-                
-            # Capitalize first letter
-            if sentence and sentence[0].isalpha():
-                sentence = sentence[0].upper() + sentence[1:]
-            sentences.append(sentence)
-        
-        if not sentences:
-            return "Summary generation failed. The output contained mostly artifacts."
-        
-        summary = '. '.join(sentences)
-        
-        # Ensure it ends with proper punctuation
-        if not summary.endswith(('.', '!', '?')):
-            summary += '.'
-        
-        # Final cleanup
-        summary = re.sub(r'\s+', ' ', summary).strip()
-        
-        return summary
-    
-    def is_quality_summary(self, summary: str, original_text: str) -> bool:
-        """Check if the generated summary is of acceptable quality"""
-        if not summary or len(summary) < 20:
-            return False
-        
-        # Check for excessive fragments
-        sentences = re.split(r'[.!?]', summary)
-        valid_sentences = [s for s in sentences if len(s.strip().split()) >= 3]
-        
-        if len(valid_sentences) < 2:
-            return False
-        
-        # Check for common artifact patterns
-        artifact_patterns = [
-            r'\b[A-Z]\.[A-Z]\.',  # I.A. patterns
-            r'\s*\.\s*\.\s*',     # Multiple dots
-            r'^[^a-zA-Z]*$',      # No alphabetic characters
-        ]
-        
-        for pattern in artifact_patterns:
-            if re.search(pattern, summary):
-                return False
-        
-        return True
-    
-    def predict(self, text: str, **gen_kwargs) -> str:
-        """Generate summary with multiple fallback strategies"""
-        
-        # Enhanced default parameters for better quality
+        # Default parameters for NER
         default_kwargs = {
-            "length_penalty": 2.0,  # Increased for longer, more coherent summaries
-            "num_beams": 8,         # More beams for better quality
-            "max_length": 300,
-            "min_length": 100,
-            "no_repeat_ngram_size": 3,
-            "early_stopping": True,
-            "do_sample": False,
-            "temperature": 0.8,     # Lower temperature for less randomness
+            "confidence_threshold": 0.7,
+            "max_entities": 50,
+            "return_confidence": True,
+            "merge_adjacent": True
         }
         
         # Update defaults with provided kwargs
@@ -178,93 +93,224 @@ class PredictionPipeline:
             processed_text = self.clean_text(text)
             
             if not processed_text:
-                return "Error: Input text is empty or invalid."
+                return []
             
-            if len(processed_text) < 100:
-                return "Error: Text is too short for summarization. Please provide at least 100 characters."
+            if len(processed_text) < 10:
+                return []
             
-            # Tokenize with appropriate settings
+            # Tokenize text for NER - FIXED: Remove is_split_into_words for regular strings
             inputs = self.tokenizer(
-                processed_text, 
-                max_length=1024, 
-                truncation=True, 
-                padding="longest",
-                return_tensors="pt"
+                processed_text,
+                truncation=True,
+                padding=True,
+                max_length=512,
+                return_tensors="pt",
+                return_offsets_mapping=False  # Remove this to avoid issues
             ).to(self.device)
             
-            # Generate summary with multiple attempts if needed
-            max_attempts = 2
-            for attempt in range(max_attempts):
-                try:
-                    with torch.no_grad():
-                        summary_ids = self.model.generate(
-                            inputs["input_ids"],
-                            attention_mask=inputs.get("attention_mask"),
-                            **default_kwargs
-                        )
-                    
-                    # Decode summary
-                    summary = self.tokenizer.decode(
-                        summary_ids[0], 
-                        skip_special_tokens=True, 
-                        clean_up_tokenization_spaces=True
-                    )
-                    
-                    # Post-process
-                    summary = self.postprocess_summary(summary)
-                    
-                    # Check quality
-                    if self.is_quality_summary(summary, processed_text):
-                        logger.info(f"Quality summary generated (attempt {attempt + 1})")
-                        return summary
-                    else:
-                        logger.warning(f"Poor quality summary on attempt {attempt + 1}")
-                        # Adjust parameters for retry
-                        default_kwargs["temperature"] = max(0.5, default_kwargs["temperature"] - 0.1)
-                        default_kwargs["num_beams"] = min(10, default_kwargs["num_beams"] + 1)
-                
-                except Exception as e:
-                    logger.error(f"Generation attempt {attempt + 1} failed: {str(e)}")
-                    if attempt == max_attempts - 1:
-                        raise
+            # Get predictions
+            with torch.no_grad():
+                outputs = self.model(
+                    input_ids=inputs["input_ids"],
+                    attention_mask=inputs.get("attention_mask")
+                )
+                predictions = torch.argmax(outputs.logits, dim=-1).cpu().numpy()[0]
+                # Get confidence scores (softmax probabilities)
+                probabilities = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().numpy()[0]
+                confidence_scores = np.max(probabilities, axis=-1)
             
-            # If all attempts failed, use extractive fallback
-            logger.info("Using extractive fallback summary")
-            fallback_summary = self.extract_key_sentences(processed_text)
-            return self.postprocess_summary(fallback_summary)
+            # Get word IDs for alignment
+            word_ids = inputs.word_ids(batch_index=0)
+            tokens = self.tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
+            
+            # Align predictions with words
+            aligned_entities = []
+            current_entity = None
+            
+            for idx, (word_idx, prediction, confidence) in enumerate(zip(word_ids, predictions, confidence_scores)):
+                if word_idx is None:
+                    # Skip special tokens
+                    continue
+                
+                entity_label = self.label_list[prediction]
+                
+                # If it's a new entity or different from current
+                if entity_label.startswith('B-') or current_entity is None or current_entity["entity"] != entity_label:
+                    # Save current entity if it exists
+                    if current_entity is not None:
+                        aligned_entities.append(current_entity)
+                    
+                    # Start new entity
+                    if entity_label != 'O':
+                        current_entity = {
+                            "entity": entity_label,
+                            "word": tokens[idx].replace("##", ""),
+                            "start": idx,
+                            "end": idx,
+                            "score": confidence,
+                            "type": self.entity_type_map.get(entity_label.split("-")[-1], "OTHER")
+                        }
+                    else:
+                        current_entity = None
+                elif current_entity is not None and entity_label.startswith('I-') and current_entity["entity"].endswith(entity_label[2:]):
+                    # Continue current entity
+                    current_entity["word"] += tokens[idx].replace("##", "")
+                    current_entity["end"] = idx
+                    current_entity["score"] = max(current_entity["score"], confidence)
+                else:
+                    # Entity changed or ended
+                    if current_entity is not None:
+                        aligned_entities.append(current_entity)
+                        current_entity = None
+            
+            # Add the last entity if it exists
+            if current_entity is not None:
+                aligned_entities.append(current_entity)
+            
+            # Post-process entities
+            processed_entities = self.postprocess_entities(
+                aligned_entities, 
+                default_kwargs["confidence_threshold"]
+            )
+            
+            # Merge adjacent entities if requested
+            if default_kwargs["merge_adjacent"]:
+                processed_entities = self.merge_adjacent_entities(processed_entities)
+            
+            # Limit number of entities
+            if default_kwargs["max_entities"] > 0:
+                processed_entities = processed_entities[:default_kwargs["max_entities"]]
+            
+            logger.info(f"Found {len(processed_entities)} entities")
+            return processed_entities
             
         except torch.cuda.OutOfMemoryError:
-            error_msg = "Error: GPU out of memory. Try with shorter text or reduce beam size."
+            error_msg = "Error: GPU out of memory. Try with shorter text."
             logger.error(error_msg)
-            return error_msg
+            return []
             
         except Exception as e:
-            error_msg = f"Error during summarization: {str(e)}"
+            error_msg = f"Error during NER processing: {str(e)}"
             logger.error(error_msg)
-            # Final fallback
-            fallback_summary = self.extract_key_sentences(self.clean_text(text))
-            return f"Note: Using basic summary due to generation issues.\n\n{fallback_summary}"
+            import traceback
+            logger.error(traceback.format_exc())  # Add detailed traceback
+            return []
+    
+    def postprocess_entities(self, entities: List[Dict], confidence_threshold: float = 0.7) -> List[Dict]:
+        """Post-process entities and filter by confidence"""
+        processed_entities = []
+        
+        for entity in entities:
+            # Filter out "O" (outside) entities
+            if entity["entity"] == "O":
+                continue
+            
+            # Filter by confidence threshold
+            if entity["score"] < confidence_threshold:
+                continue
+            
+            # Clean entity word
+            entity_word = entity["word"].replace(" ##", "").replace("##", "")
+            
+            # Skip very short entities (likely noise)
+            if len(entity_word.strip()) < 2:
+                continue
+            
+            processed_entity = {
+                "text": entity_word,
+                "type": entity["type"],
+                "entity_label": entity["entity"],
+                "confidence": round(entity["score"], 3),
+                "start_pos": entity["start"],
+                "end_pos": entity["end"]
+            }
+            
+            processed_entities.append(processed_entity)
+        
+        return processed_entities
+    
+    def merge_adjacent_entities(self, entities: List[Dict]) -> List[Dict]:
+        """Merge adjacent entities of the same type"""
+        if not entities:
+            return []
+        
+        merged_entities = []
+        current_entity = entities[0].copy()
+        
+        for i in range(1, len(entities)):
+            current = entities[i]
+            prev = entities[i-1]
+            
+            # Check if adjacent and same type
+            if (current["type"] == prev["type"] and 
+                current["start_pos"] == prev["end_pos"] + 1):
+                # Merge entities
+                current_entity["text"] += " " + current["text"]
+                current_entity["end_pos"] = current["end_pos"]
+                current_entity["confidence"] = (current_entity["confidence"] + current["confidence"]) / 2
+            else:
+                # Save current entity and start new one
+                merged_entities.append(current_entity)
+                current_entity = current.copy()
+        
+        # Add the last entity
+        merged_entities.append(current_entity)
+        
+        return merged_entities
+    
+    def get_entity_types(self) -> List[str]:
+        """Get available entity types"""
+        return list(self.entity_type_map.values())
     
     def get_recommended_parameters(self, text_length: int) -> Dict[str, Any]:
-        """Get recommended parameters based on text characteristics"""
-        if text_length < 500:
+        """Get recommended parameters based on text length"""
+        if text_length < 100:
             return {
-                "max_length": 80,
-                "min_length": 40,
-                "num_beams": 4,
-                "length_penalty": 1.5
+                "confidence_threshold": 0.8,
+                "max_entities": 10
             }
-        elif text_length < 2000:
+        elif text_length < 500:
             return {
-                "max_length": 150,
-                "min_length": 80,
-                "num_beams": 6,
-                "length_penalty": 2.0
+                "confidence_threshold": 0.7,
+                "max_entities": 25
             }
         else:
             return {
-                "max_length": 200,
-                "min_length": 100,
-                "num_beams": 8,
-                "length_penalty": 2.5
+                "confidence_threshold": 0.6,
+                "max_entities": 50
             }
+    
+    def analyze_entity_statistics(self, entities: List[Dict]) -> Dict[str, Any]:
+        """Analyze entity statistics for the given text"""
+        stats = {
+            "total_entities": len(entities),
+            "entities_by_type": defaultdict(int),
+            "average_confidence": 0.0,
+            "confidence_distribution": defaultdict(int)
+        }
+        
+        if not entities:
+            return stats
+        
+        total_confidence = 0.0
+        
+        for entity in entities:
+            entity_type = entity["type"]
+            confidence = entity["confidence"]
+            
+            stats["entities_by_type"][entity_type] += 1
+            total_confidence += confidence
+            
+            # Categorize confidence
+            if confidence >= 0.9:
+                stats["confidence_distribution"]["high"] += 1
+            elif confidence >= 0.7:
+                stats["confidence_distribution"]["medium"] += 1
+            else:
+                stats["confidence_distribution"]["low"] += 1
+        
+        stats["average_confidence"] = round(total_confidence / len(entities), 3)
+        stats["entities_by_type"] = dict(stats["entities_by_type"])
+        stats["confidence_distribution"] = dict(stats["confidence_distribution"])
+        
+        return stats
