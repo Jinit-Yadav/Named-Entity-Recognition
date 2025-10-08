@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Add src folder to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 from flask import Flask, render_template, request, jsonify
 from textSummarizer.pipeline.prediction import PredictionPipeline
 import logging

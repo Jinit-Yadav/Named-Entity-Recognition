@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Add src folder to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 from textSummarizer.config.configuration import ConfigurationManager
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
